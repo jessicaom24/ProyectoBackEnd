@@ -2,20 +2,18 @@ const express = require('express');
 const app = express();
 const PORT = 8080;
 
-//Esto permite a la aplicación recibir solicitudes en formato JSON
+const productRoutes = require('./routes/products.routes');
+const cartRoutes = require('./routes/carts.routes');
+
+app.use(express.json());
+app.use('/api/products', productRoutes);
+app.use('/api/carts', cartRoutes);
+
+app.get('/', (req, res) => {
+    res.send('¡Bienvenido a la API de Lencería E-commerce!');
+});
 
 
-//Ruta prueba
-app.get('/',(req,res)=>{
-    res.send("Estoy escuchando tu solicitud!")
-})
-
-/*app.get('/consulta',(req,res)=>{
-    res.json({
-        message: "Estoy escuchando tu solicitud!"})
-})*/
-
-//Iniciar el servidor
-app.listen(PORT, () =>{
-        console.log(`Servidor escuchando en: http://localhost:${PORT}`)
-})
+app.listen(PORT, () => {
+    console.log(`Servidor escuchando en el puerto ${PORT}`);
+});
