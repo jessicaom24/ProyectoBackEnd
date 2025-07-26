@@ -72,13 +72,27 @@ const defaultProducts = [
   }
 ];
 
+function validarProducto(data){
+  const {title, description, code, price, status, stock, category, thumbnails}=data;
+
+  if(typeof title !== 'string') return 'El titulo debe ser un string';
+  if(typeof description !== 'string') return 'La descripción debe ser un string';
+  if(typeof code !== 'string') return 'El código debe ser un string';
+  if (typeof status !== 'boolean') return 'El estado debe ser booleano';
+  if (typeof stock !== 'number') return 'El stock debe ser un número';
+  if (typeof category !== 'string') return 'La categoría debe ser un string';
+  if (!Array.isArray(thumbnails)) return 'Las imágenes deben ser un array de strings';
+
+  return null;
+}
+
 class ProductManager {
   async getAll() {
     try {
       const data = await fs.readFile(filePath, 'utf-8');
       const products = JSON.parse(data);
 
-      if (!Array.isArray(products) || products.length === 0) {
+      if (products.length === 0) {
         await fs.writeFile(filePath, JSON.stringify(defaultProducts, null, 2));
         return defaultProducts;
       }
@@ -91,34 +105,53 @@ class ProductManager {
   }
 
   async getById(id) {
-    const products = await this.getAll();
-    return products.find(p => p.id === id);
+    try {
+      const products = await this.getAll();
+      return products.find(p => p.id === id);
+    } catch (err) {
+      throw new Error('Error al buscar producto');
+    }
   }
 
   async add(product) {
-    const products = await this.getAll();
-    const newProduct = {
-      id: (Date.now()).toString(),
-      ...product,
-    };
-    products.push(newProduct);
-    await fs.writeFile(filePath, JSON.stringify(products, null, 2));
-    return newProduct;
+    try {
+      const error = validarProducto(product);
+      if (error) throw new Error(error);
+
+      const products = await this.getAll();
+      const newProduct = {
+        id: Date.now().toString(),
+        ...product,
+      };
+      products.push(newProduct);
+      await fs.writeFile(filePath, JSON.stringify(products, null, 2));
+      return newProduct;
+    } catch (err) {
+      throw new Error('No se pudo agregar el producto: ' + err.message);
+    }
   }
 
   async update(id, updates) {
-    const products = await this.getAll();
-    const index = products.findIndex(p => p.id === id);
-    if (index === -1) return null;
-    products[index] = { ...products[index], ...updates, id };
-    await fs.writeFile(filePath, JSON.stringify(products, null, 2));
-    return products[index];
+    try {
+      const products = await this.getAll();
+      const index = products.findIndex(p => p.id === id);
+      if (index === -1) return null;
+      products[index] = { ...products[index], ...updates, id };
+      await fs.writeFile(filePath, JSON.stringify(products, null, 2));
+      return products[index];
+    } catch (err) {
+      throw new Error('No se pudo actualizar el producto');
+    }
   }
 
   async delete(id) {
-    const products = await this.getAll();
-    const filtered = products.filter(p => p.id !== id);
-    await fs.writeFile(filePath, JSON.stringify(filtered, null, 2));
+    try {
+      const products = await this.getAll();
+      const filtered = products.filter(p => p.id !== id);
+      await fs.writeFile(filePath, JSON.stringify(filtered, null, 2));
+    } catch (err) {
+      throw new Error('No se pudo eliminar el producto');
+    }
   }
 }
 
