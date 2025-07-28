@@ -1,0 +1,13 @@
+<head><link rel="stylesheet" href="/css/style.css" /></head>
+{{!-- views/home.handlebars --}}
+{{!-- Usa el layout base --}}
+{{#extend "main"}}
+  {{#content "title"}}Lista de Productos{{/content}}
+  {{#content "body"}}
+    <ul>
+      {{#each products}}
+        <li><strong>{{title}}</strong> - ${{price}}</li>
+      {{/each}}
+    </ul>
+  {{/content}}
+{{/extend}}
