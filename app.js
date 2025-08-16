@@ -8,6 +8,7 @@ const connectDB = require('./db/mongo');
 const productsRouter = require('./routes/products.routes');
 const cartsRouter = require('./routes/carts.routes');
 const viewsRouter = require('./routes/views.routes');
+const methodOverride = require('method-override');
 
 const app = express();
 const server = http.createServer(app);
@@ -16,12 +17,15 @@ const io = new Server(server);
 // Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Handlebars setup
 app.engine('handlebars', exphbs.engine());
 app.set('view engine', 'handlebars');
 app.set('views', path.join(__dirname, 'views'));
+
+
 
 // Rutas
 app.use('/api/products', productsRouter);
