@@ -1,26 +1,48 @@
-// routes/views.routes.js
 const express = require('express');
 const router = express.Router();
-const ProductManager = require('../managers/ProductManager'); // Asegúrate que este exista
-const productManager = new ProductManager('src/data/products.json'); // ajusta ruta si es diferente
+const Product = require('../models/Product');
+const Cart = require('../models/Cart');
 
-// Ruta para renderizar la vista "home" con los productos
-router.get('/home', async (req, res) => {
+// Listado de productos con paginación
+router.get('/products', async (req, res) => {
   try {
-    const products = await productManager.getAll(); // ✅ AQUÍ se declara
-    res.render('home', { products }); // y se pasa a la vista
+    const { limit = 10, page = 1 } = req.query;
+    const result = await Product.paginate({}, { limit, page, lean: true });
+
+    res.render('products', {
+      products: result.docs,
+      totalPages: result.totalPages,
+      page: result.page,
+      hasPrevPage: result.hasPrevPage,
+      hasNextPage: result.hasNextPage,
+      prevPage: result.prevPage,
+      nextPage: result.nextPage,
+      limit
+    });
   } catch (error) {
-    res.status(500).send('Error al cargar los productos');
+    res.status(500).send('Error al cargar productos');
   }
 });
 
-// Ruta para vista en tiempo real (usando websocket más adelante)
-router.get('/realtimeproducts', async (req, res) => {
+// Vista de detalle de producto
+router.get('/products/:pid', async (req, res) => {
   try {
-    const products = await productManager.getAll();
-    res.render('realTimeProducts', { products });
+    const product = await Product.findById(req.params.pid).lean();
+    if (!product) return res.status(404).send('Producto no encontrado');
+    res.render('productDetail', { product });
   } catch (error) {
-    res.status(500).send('Error al cargar los productos en tiempo real');
+    res.status(500).send('Error al cargar producto');
+  }
+});
+
+// Vista de carrito
+router.get('/carts/:cid', async (req, res) => {
+  try {
+    const cart = await Cart.findById(req.params.cid).populate('products.product').lean();
+    if (!cart) return res.status(404).send('Carrito no encontrado');
+    res.render('cart', { cart });
+  } catch (error) {
+    res.status(500).send('Error al cargar carrito');
   }
 });
 

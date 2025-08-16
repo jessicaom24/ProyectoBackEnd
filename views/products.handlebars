@@ -1,0 +1,35 @@
+{{!-- views/products.handlebars --}}
+{{#extend "main"}}
+  {{#content "title"}}Lista de Productos{{/content}}
+
+  {{#content "body"}}
+    <h2>Productos disponibles</h2>
+    <ul>
+      {{#each products}}
+        <li>
+          <strong>{{title}}</strong> - ${{price}}
+          <br>
+          Categoría: {{category}} | Stock: {{stock}}
+          <br>
+          <a href="/products/{{_id}}">Ver detalles</a>
+          |
+          <form action="/api/carts/{{cartId}}/products/{{_id}}" method="post" style="display:inline;">
+            <button type="submit">Agregar al carrito</button>
+          </form>
+        </li>
+      {{/each}}
+    </ul>
+
+    <div class="pagination">
+      {{#if hasPrevPage}}
+        <a href="/products?page={{prevPage}}&limit={{limit}}">⬅️ Anterior</a>
+      {{/if}}
+
+      <span>Página {{page}} de {{totalPages}}</span>
+
+      {{#if hasNextPage}}
+        <a href="/products?page={{nextPage}}&limit={{limit}}">Siguiente ➡️</a>
+      {{/if}}
+    </div>
+  {{/content}}
+{{/extend}}
