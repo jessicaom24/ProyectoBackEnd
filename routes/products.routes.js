@@ -71,4 +71,16 @@ router.delete('/:pid', async (req, res) => {
   }
 });
 
+
+const Cart = require('../models/Cart');
+
+router.get('/:cid', async (req, res) => {
+  try {
+    const cart = await Cart.findById(req.params.cid).populate('products.product');
+    cart ? res.json(cart) : res.status(404).json({ error: 'Carrito no encontrado' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
